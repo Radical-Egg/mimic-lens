@@ -1,0 +1,197 @@
+{{define "index"}}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mimic-Lens</title>
+  <link rel="stylesheet" href="/static/pico/css/pico.min.css">
+  <link rel="stylesheet" href="/static/css/custom.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Germania+One&family=Raleway:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+</head>
+<body>
+  <main class="container raleway-regular">
+    <header>
+      <h1 class="germania-one-regular"> MIMIC LENS </h1>
+      <p>Check your gameservers steam query port and game port.</p>
+    </header>
+
+    <form method="post" action="/">
+      <div class="grid">
+        <label class="raleway-bold">
+          Gameserver Host / IP
+          <input
+            type="text"
+            name="host"
+            placeholder="example.com or 192.168.1.10"
+            value="{{.Host}}"
+            required
+          >
+        </label>
+
+        <label class="raleway-bold">
+          Query Port
+          <input
+            type="number"
+            name="query_port"
+            placeholder="27015"
+            min="1"
+            max="65535"
+            value="{{.QueryPort}}"
+            required
+          >
+          <small>Used for A2S_INFO / Steam query checks.</small>
+        </label>
+
+        <label class="raleway-bold">
+          Game Port
+          <input
+            type="number"
+            name="game_port"
+            placeholder="7777"
+            min="1"
+            max="65535"
+            value="{{.GamePort}}"
+            required
+          >
+          <small>Used for a simple UDP probe only.</small>
+        </label>
+      </div>
+
+      <button class="raleway-bold" type="submit">Run checks</button>
+    </form>
+
+    {{if .Submitted}}
+
+      {{if .Error}}
+      <article>
+        <header class="raleway-bold">Notes</header>
+        <p>{{.Error}}</p>
+      </article>
+      {{end}}
+
+      <section>
+        <article>
+          <header>Query Port Check</header>
+
+          {{if .QueryResult}}
+          <table>
+            <tbody>
+              <tr>
+                <th scope="row">Reachable</th>
+                <td>{{if .QueryResult.Reachable}}Yes{{else}}No{{end}}</td>
+              </tr>
+              <tr>
+                <th scope="row">RTT</th>
+                <td>{{.QueryResult.RTTMs}} ms</td>
+              </tr>
+              <tr>
+                <th scope="row">Name</th>
+                <td>{{.QueryResult.Name}}</td>
+              </tr>
+              <tr>
+                <th scope="row">Game</th>
+                <td>{{.QueryResult.Game}}</td>
+              </tr>
+              <tr>
+                <th scope="row">Map</th>
+                <td>{{.QueryResult.Map}}</td>
+              </tr>
+              <tr>
+                <th scope="row">Version</th>
+                <td>{{.QueryResult.Version}}</td>
+              </tr>
+              <tr>
+                <th scope="row">Players</th>
+                <td>{{.QueryResult.Players}} / {{.QueryResult.MaxPlayers}}</td>
+              </tr>
+              <tr>
+                <th scope="row">Bots</th>
+                <td>{{.QueryResult.Bots}}</td>
+              </tr>
+              <tr>
+                <th scope="row">Server Type</th>
+                <td>{{.QueryResult.ServerType}}</td>
+              </tr>
+              <tr>
+                <th scope="row">Environment</th>
+                <td>{{.QueryResult.Environment}}</td>
+              </tr>
+              <tr>
+                <th scope="row">Password Protected</th>
+                <td>{{if .QueryResult.Password}}Yes{{else}}No{{end}}</td>
+              </tr>
+              <tr>
+                <th scope="row">VAC</th>
+                <td>{{if .QueryResult.VAC}}Enabled{{else}}Disabled{{end}}</td>
+              </tr>
+              {{if .QueryResult.Keywords}}
+              <tr>
+                <th scope="row">Keywords</th>
+                <td>{{.QueryResult.Keywords}}</td>
+              </tr>
+              {{end}}
+            </tbody>
+          </table>
+          {{else}}
+          <p>No A2S_INFO result returned.</p>
+          {{end}}
+        </article>
+
+        <article>
+          <header class="raleway-bold">Game Port Probe</header>
+
+          {{if .GameProbe}}
+          <table>
+            <tbody>
+              <tr>
+                <th scope="row">Packet Sent</th>
+                <td>{{if .GameProbe.PacketSent}}Yes{{else}}No{{end}}</td>
+              </tr>
+              <tr>
+                <th scope="row">Responded</th>
+                <td>{{if .GameProbe.Responded}}Yes{{else}}No{{end}}</td>
+              </tr>
+              <tr>
+                <th scope="row">RTT</th>
+                <td>{{.GameProbe.RTTMs}} ms</td>
+              </tr>
+              <tr>
+                <th scope="row">Bytes Read</th>
+                <td>{{.GameProbe.BytesRead}}</td>
+              </tr>
+              <tr>
+                <th scope="row">Status</th>
+                <td>
+                  {{if eq .GameProbe.Status "response_received"}}Response received{{end}}
+                  {{if eq .GameProbe.Status "no_response"}}No response{{end}}
+                  {{if eq .GameProbe.Status "port_unreachable"}}Port unreachable / ICMP-style error{{end}}
+                  {{if eq .GameProbe.Status "send_failed"}}Send failed{{end}}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <small>
+            A game port probe is a lightweight UDP health check. A lack of response does not always prove failure,
+            but it is often useful when troubleshooting forwarding or filtering issues.
+          </small>
+          {{else}}
+          <p>No game port probe result returned.</p>
+          {{end}}
+        </article>
+      </section>
+
+    {{end}}
+
+    <footer>
+      <small>
+        This was generally vibe coded. If something is broken, the code is here. Fix or file an issue. I am not responsible for anything.
+      </small>
+    </footer>
+  </main>
+</body>
+</html>
+{{end}}

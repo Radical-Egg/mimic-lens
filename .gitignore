@@ -1,0 +1,46 @@
+# Binaries
+mimic-lens
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binaries / coverage
+*.test
+*.out
+coverage.out
+
+# Build output
+dist/
+build/
+bin/
+
+# Go workspace files
+go.work
+go.work.sum
+
+# Dependency/vendor copies if you are not intentionally committing them
+vendor/
+
+# Environment files
+.env
+.env.*
+
+# Editor / OS noise
+.DS_Store
+Thumbs.db
+
+# IDEs / editors
+.vscode/
+.idea/
+
+# JetBrains
+*.iml
+
+# Logs
+*.log
+
+# Temporary files
+tmp/
+*.tmp
